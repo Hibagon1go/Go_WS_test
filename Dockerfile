@@ -1,12 +1,15 @@
-FROM golang:1.18.2-alpine3.16
+FROM golang:1.18
 
-ENV ROOT=/go/src/app
-WORKDIR ${ROOT}
+WORKDIR /app
 
-RUN apk update && apk add git
-
-COPY ./main.go ${ROOT}
-
-COPY go.mod ${ROOT}
+COPY go.mod .
+COPY go.sum .
 
 RUN go mod tidy
+
+COPY . .
+
+RUN curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+
+#ホットリロードを可能に
+CMD ["air"]

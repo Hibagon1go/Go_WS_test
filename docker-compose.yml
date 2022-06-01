@@ -1,37 +1,34 @@
 version: "3"
 services:
-  app:
+  ws:
     build: .
     depends_on:
-      - db
+      - redis
+    ports:
+      - 8080:8080
     volumes:
       - type: bind
         source: ./
-        target: /go/src/app
+        target: /app
     tty: true
     networks:
       - go_ws_network
 
-  db:
-    platform: linux/x86_64
-    image: mysql:5.7
-    environment:
-      - MYSQL_DATABASE=test_db
-      - MYSQL_ROOT_PASSWORD=password
-    command: >
-      --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --innodb_file_per_table --innodb_file_format=BARRACUDA --innodb_large_prefix=1
-    ports:
-      - 3306:3306
+  redis:
+    image: redis:latest
+    command: [ "redis-server", "/etc/redis/redis.conf" ]
     volumes:
-      - type: volume
-        source: mysql_go_ws_volume
-        target: /var/lib/mysql
+      - type: bind
+        source: ./redis.conf
+        target: /etc/redis/redis.conf
+    ports:
+      - 6379:6379
     networks:
       - go_ws_network
 
 volumes:
-  mysql_go_ws_volume:
-    name: mysql_go_ws_volume
+  redis_go_ws_volume:
+    name: redis_go_ws_volume
 
 networks:
   go_ws_network:
